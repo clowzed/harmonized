@@ -23,6 +23,7 @@ name = "harmonized"
 version = "0.1.0"
 dependencies = [
  "fraction",
+ "lazy_static",
  "text_io",
 ]
 
