@@ -9,12 +9,37 @@ mod accords;
 mod tacts;
 use text_io::read;
 
+type Octave   = u8;
+type Number   = i8;
+type Duration = fraction::Fraction;
 
-fn main() -> Result<(), fraction::error::ParseError>
+
+fn parse_duration(s: &str) -> Option<Duration> 
+{
+    lazy_static!{
+        static ref FRACTION_PATTERN:regex::Regex = regex::Regex::new(r"^\d/\d$").unwrap();
+    }
+    return match FRACTION_PATTERN.is_match(s)
+    {
+        true => {
+            let parts = s.split('/').collect::<Vec<_>>();
+            let nominator:u64   = parts[0].parse().unwrap();
+            let denominator:u64 = parts[1].parse().unwrap();
+            Some(Duration::new(nominator, denominator))
+        }
+        false => None
+    };
+    
+}
+
+fn main()
 {
 
     dotenv::dotenv().ok();
     env_logger::init();
+    
+    
+    
     
     //? Config
     let accords_amount = 8;
@@ -37,7 +62,7 @@ fn main() -> Result<(), fraction::error::ParseError>
 
     for accord_index in 0..accords_amount
     {
-        debug!("filling accord with number: {}", accord_index);
+        debug!("Filling accord with number: {}", accord_index);
         
         //? checking if tact is full
         if !accords_durations_sum.is_nan() && accords_durations_sum >= tacts_volume
@@ -49,14 +74,12 @@ fn main() -> Result<(), fraction::error::ParseError>
             accords_durations_sum = fraction::Fraction::new(0_u64, 0_u64);
         }
 
+
+
         let mut new_accord = accords::Accord::new();
 
 
-
-
-
         //? Reading note params
-        println!("Enter params for the fist note of accord");
 
         println!("Note height - octave : ");
         let octave:u8 = read!();
@@ -64,20 +87,43 @@ fn main() -> Result<(), fraction::error::ParseError>
         debug!("Entered octave: {}", octave);
 
         println!("Note height - number : ");
-        let number: u8 = read!();
+        let number: i8 = read!();
+        
         debug!("Entered number: {}", number);
 
-        let note_height = notes::NoteHeight::new(octave, number);
+        let note_height = match notes::NoteHeight::new(octave, number)
+        {
+            Some(height) => height,
+            None => 
+            {
+                error!("Impossible to create such height!");
+                std::process::exit(1);
+            }
+        };
         debug!("Created note height: {:?}", note_height);
+        
+        
+        
         
         
         println!("Note duration: ");
         let duration:String = read!();
              
     
-        let duration = fraction::Fraction::from_decimal_str(&duration)?;
+        let duration = match parse_duration(&duration)
+        {
+            Some(duration) => duration,
+            None => {println!("Failed to parse duration: {}", duration); return;}
+        };
 
-        let new_note = notes::Note::new(note_height, duration);
+        let new_note = match notes::Note::new(note_height, duration)
+        {
+            Some(note) => note,
+            None => {
+                error!("Couldn't create note!");
+                std::process::exit(1);
+            }
+        };
 
 
 
@@ -114,6 +160,4 @@ fn main() -> Result<(), fraction::error::ParseError>
         println!("{}", tact);
     }
 
-
-    Ok(())
 }
