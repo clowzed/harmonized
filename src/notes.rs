@@ -1,5 +1,3 @@
-use std::ops::Not;
-
 //? Here we define all available notes durations
 lazy_static!{
     static ref AVAILABLE_NOTES_DURATIONS: std::vec::Vec<fraction::Fraction> = vec![fraction::Fraction::new(8_u64, 1_u64),
