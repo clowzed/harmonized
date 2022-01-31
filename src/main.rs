@@ -1,163 +1,139 @@
-use log::{debug, error};
-
-
 #[macro_use]
 extern crate lazy_static;
 
 mod notes;
 mod accords;
 mod tacts;
-use text_io::read;
+use dialoguer::{theme::ColorfulTheme, Select};
+
 
 type Octave   = u8;
 type Number   = i8;
 type Duration = fraction::Fraction;
 
 
-fn parse_duration(s: &str) -> Option<Duration> 
+#[derive(Debug)]
+struct Configuration
 {
-    lazy_static!{
-        static ref FRACTION_PATTERN:regex::Regex = regex::Regex::new(r"^\d/\d$").unwrap();
-    }
-    return match FRACTION_PATTERN.is_match(s)
-    {
-        true => {
-            let parts = s.split('/').collect::<Vec<_>>();
-            let nominator:u64   = parts[0].parse().unwrap();
-            let denominator:u64 = parts[1].parse().unwrap();
-            Some(Duration::new(nominator, denominator))
-        }
-        false => None
-    };
+    accords_amount : u8,
+    tacts_volume   : fraction::Fraction,
     
 }
 
-fn main()
+fn get_note(config: &Configuration) -> Option<notes::Note>
 {
+    let octaves:Vec<u8> = (1u8..config.accords_amount + 1).collect();
+    let numbers:Vec<i8> = (1i8..8i8).collect();
 
-    dotenv::dotenv().ok();
-    env_logger::init();
+    
+    let selection = Select::with_theme(&ColorfulTheme::default())
+                                 .with_prompt("Pick octave number")
+                                 .default(0)
+                                 .items(&octaves[..])
+                                 .interact()
+                                 .unwrap();
+    
+    let octave = octaves[selection];
     
     
+    let selection = Select::with_theme(&ColorfulTheme::default())
+                                 .with_prompt("Pick note number")
+                                 .default(0)
+                                 .items(&numbers[..])
+                                 .interact()
+                                 .unwrap();
+    
+    let number = numbers[selection];
+    
+    let note_height = match notes::NoteHeight::new(octave, number)
+    {
+        Some(height) => height,
+        None => return None,
+    };
     
     
-    //? Config
-    let accords_amount = 8;
-    let tacts_volume = fraction::Fraction::new(1 as u64, 1 as u64);
+    let selection = Select::with_theme(&ColorfulTheme::default())
+                                 .with_prompt("Pick note duration")
+                                 .default(0)
+                                 .items(&crate::notes::AVAILABLE_NOTES_DURATIONS[..])
+                                 .interact()
+                                 .unwrap();
     
-    debug!("Accords amount: {}", accords_amount);
-    debug!("Tacts   volume: {}", tacts_volume);
+    let duration = crate::notes::AVAILABLE_NOTES_DURATIONS[selection];
+    
+    let note = match notes::Note::new(note_height, duration)
+    {
+        Some(note) => note,
+        None => return None
+    };
+    
+    Some(note)
+    
+}
 
 
-
-    //? Temp variables
+/*
+fn split_accords_into_tacts(config: &Configuration, accords: &Vec<accords::Accord>) -> Vec<tacts::Tact>
+{
     let mut current_tact = tacts::Tact::new(tacts_volume);
     let mut accords_durations_sum = fraction::Fraction::new(0_u64, 0_u64);
 
 
 
     let mut all_tacts = std::vec::Vec::new();
+}
+*/
 
-
-
-    for accord_index in 0..accords_amount
+fn main()
+{
+    let config = Configuration 
     {
-        debug!("Filling accord with number: {}", accord_index);
-        
-        //? checking if tact is full
-        if !accords_durations_sum.is_nan() && accords_durations_sum >= tacts_volume
-        {
-            debug!("Tact volume is full! Creating new tact.");
-            
-            all_tacts.push(current_tact);
-            current_tact = tacts::Tact::new(tacts_volume);
-            accords_durations_sum = fraction::Fraction::new(0_u64, 0_u64);
-        }
-
-
-
-        let mut new_accord = accords::Accord::new();
-
-
-        //? Reading note params
-
-        println!("Note height - octave : ");
-        let octave:u8 = read!();
-        
-        debug!("Entered octave: {}", octave);
-
-        println!("Note height - number : ");
-        let number: i8 = read!();
-        
-        debug!("Entered number: {}", number);
-
-        let note_height = match notes::NoteHeight::new(octave, number)
-        {
-            Some(height) => height,
-            None => 
-            {
-                error!("Impossible to create such height!");
-                std::process::exit(1);
-            }
-        };
-        debug!("Created note height: {:?}", note_height);
-        
-        
-        
-        
-        
-        println!("Note duration: ");
-        let duration:String = read!();
-             
+        accords_amount : 8,
+        tacts_volume   : fraction::Fraction::new(1u16, 256u16),
+    };
     
-        let duration = match parse_duration(&duration)
-        {
-            Some(duration) => duration,
-            None => {println!("Failed to parse duration: {}", duration); return;}
-        };
-
-        let new_note = match notes::Note::new(note_height, duration)
+    
+    
+    let mut first_notes = std::vec::Vec::new();
+    
+    
+    
+    for _ in 0..config.accords_amount
+    {
+        let new_note = match get_note(&config)
         {
             Some(note) => note,
-            None => {
-                error!("Couldn't create note!");
-                std::process::exit(1);
+            None => 
+            {
+                println!("Failed to create note with this params!");
+                return;
             }
         };
-
-
-
-
-        
-        //? Setting first node in accord
-        new_accord.set_note(Some(new_note), 1);
-
-
-        current_tact.add_accord(new_accord);
-
-
-
-        // ? Guard of notes sum of durations!
-        if accords_durations_sum.is_nan()
-        {
-            accords_durations_sum = duration;
-        }
-        else 
-        {
-            accords_durations_sum += duration;      
-        }
-
-        if accords_durations_sum > tacts_volume
-        {
-            panic!("Volume of tact is smaller than enterd new note duration! Durations of first notes: {}. Tact volume: {}", accords_durations_sum, tacts_volume);
-        }
+        first_notes.push(new_note);
     }
+    
+    
 
-
-
-    for tact in all_tacts.iter()
+    let accords: Vec<accords::Accord> = first_notes.iter()
+                                                   .map(|note| 
+                                                        {
+                                                            let mut new_accord = accords::Accord::new();
+                                                            new_accord.set_note(Some(*note), 1);
+                                                            new_accord
+                                                        })
+                                                   .collect();
+                                                   
+    for accord in accords.iter()
+    {
+        println!("{}", accord);
+    }
+    
+    
+    //let tacts = split_accords_into_tacts(&accords);
+    /*
+    for tact in tacts.iter()
     {
         println!("{}", tact);
     }
-
+    */
 }

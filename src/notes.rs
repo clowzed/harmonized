@@ -1,6 +1,6 @@
 //? Here we define all available notes durations
 lazy_static!{
-    static ref AVAILABLE_NOTES_DURATIONS: std::vec::Vec<fraction::Fraction> = vec![fraction::Fraction::new(8_u64, 1_u64),
+    pub static ref AVAILABLE_NOTES_DURATIONS: std::vec::Vec<fraction::Fraction> = vec![fraction::Fraction::new(8_u64, 1_u64),
                                                                                    fraction::Fraction::new(4_u64, 1_u64),
                                                                                    fraction::Fraction::new(2_u64, 1_u64),
                                                                                    fraction::Fraction::new(1_u64, 1_u64),
