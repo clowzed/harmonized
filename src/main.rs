@@ -72,24 +72,12 @@ fn get_note(config: &Configuration) -> Option<notes::Note>
 }
 
 
-/*
-fn split_accords_into_tacts(config: &Configuration, accords: &Vec<accords::Accord>) -> Vec<tacts::Tact>
-{
-    let mut current_tact = tacts::Tact::new(tacts_volume);
-    let mut accords_durations_sum = fraction::Fraction::new(0_u64, 0_u64);
-
-
-
-    let mut all_tacts = std::vec::Vec::new();
-}
-*/
-
 fn main()
 {
     let config = Configuration 
     {
-        accords_amount : 8,
-        tacts_volume   : fraction::Fraction::new(1u16, 256u16),
+        accords_amount : 4,
+        tacts_volume   : fraction::Fraction::new(1u16, 1u16),
     };
     
     
@@ -129,11 +117,18 @@ fn main()
     }
     
     
-    //let tacts = split_accords_into_tacts(&accords);
-    /*
+    let tacts = match tacts::Tact::sequence_from(&accords, config.tacts_volume)
+    {
+        Some(tacts) => tacts,
+        None => {
+            println!("Failed to split acccords into tasks. Check accords first notes durations sum!");
+            return;
+        }
+    };
+
     for tact in tacts.iter()
     {
         println!("{}", tact);
     }
-    */
+
 }

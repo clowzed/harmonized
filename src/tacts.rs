@@ -1,5 +1,7 @@
 use crate::accords;
+use fraction::ToPrimitive;
 
+#[derive(Debug, Clone)]
 pub struct Tact
 {
     accords: std::vec::Vec<accords::Accord>,
@@ -21,6 +23,48 @@ impl Tact
     pub fn add_accord(&mut self, accord: accords::Accord)
     {
         self.accords.push(accord)
+    }
+
+    pub fn sequence_from(accords: &Vec<accords::Accord>, volume: fraction::Fraction) -> Option<std::vec::Vec<Tact>>
+    {
+        let mut notes_durations = accords[0].first.unwrap().duration;
+        for ind in 1..accords.len()
+        {
+            notes_durations += accords[ind].first.unwrap().duration;
+        }
+
+        if !((notes_durations % volume).to_i8() == Some(0i8))
+        {
+            return None;
+        }
+
+        // TODO Place this logic into add_accord and add current_volume to Tact
+
+        let mut tacts = std::vec::Vec::new();
+        let mut current_tact = Tact::new(volume);
+        let mut current_tact_volume = crate::Duration::nan();
+
+        for accord in accords.iter()
+        {
+            if current_tact_volume == volume
+            {
+                tacts.push(current_tact);
+                current_tact_volume = crate::Duration::nan();
+                current_tact = Tact::new(volume);
+            }
+
+            current_tact.add_accord(accord.clone());
+            if current_tact_volume.is_nan()
+            {
+                current_tact_volume = accord.first.unwrap().duration;
+            }
+            else
+            {
+                current_tact_volume += accord.first.unwrap().duration;
+            }
+        }   
+
+        Some(tacts)
     }
 }
 

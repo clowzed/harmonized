@@ -5,10 +5,10 @@ use crate::notes;
 #[derive(Debug, Clone, Copy)]
 pub struct Accord
 {
-    first  : Option<notes::Note>,
-    second : Option<notes::Note>,
-    third  : Option<notes::Note>,
-    fourth : Option<notes::Note>,
+    pub first  : Option<notes::Note>,
+    pub second : Option<notes::Note>,
+    pub third  : Option<notes::Note>,
+    pub fourth : Option<notes::Note>,
 }
 
 impl Accord

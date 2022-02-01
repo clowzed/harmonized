@@ -26,16 +26,16 @@ const MAX_NUMBER: crate::Number = 7 * (OCTAVE_MAX_NUMBER as crate::Number);
 #[derive(Debug, Clone, Copy)]
 pub struct NoteHeight
 {
-    octave : crate::Octave,
-    number : crate::Number,
+    pub octave : crate::Octave,
+    pub number : crate::Number,
 
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Note
 {
-    height   : NoteHeight,
-    duration : crate::Duration,
+    pub height   : NoteHeight,
+    pub duration : crate::Duration,
 }
 
 
