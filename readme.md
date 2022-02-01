@@ -1,7 +1,7 @@
 <div align = "center">
-    <h2>Harmonized</h2>
+    <h1>Harmonized</h1>
+    <img src = "./logo.png"/>
     <h3>Tool for solving harmonics tasks</h3>
-    <sup style="padding: 3px; margin: 5px; border-radius: 3px; background-color: blue;">In progress</sup>
 </div>
 
 ## Installation steps

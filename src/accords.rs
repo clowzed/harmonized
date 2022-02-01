@@ -33,7 +33,7 @@ impl Accord
 
     pub fn get_note(&self, position: u8) -> Option<notes::Note>
     {
-        return match position
+        match position
         {   
             1 => self.first,
             2 => self.second,

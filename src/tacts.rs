@@ -25,15 +25,15 @@ impl Tact
         self.accords.push(accord)
     }
 
-    pub fn sequence_from(accords: &Vec<accords::Accord>, volume: fraction::Fraction) -> Option<std::vec::Vec<Tact>>
+    pub fn sequence_from(accords: &[accords::Accord], volume: fraction::Fraction) -> Option<std::vec::Vec<Tact>>
     {
         let mut notes_durations = accords[0].first.unwrap().duration;
-        for ind in 1..accords.len()
+        for accord in accords.iter().skip(1)
         {
-            notes_durations += accords[ind].first.unwrap().duration;
+            notes_durations += accord.first.unwrap().duration;
         }
 
-        if !((notes_durations % volume).to_i8() == Some(0i8))
+        if (notes_durations % volume).to_i8() != Some(0i8)
         {
             return None;
         }
@@ -53,7 +53,7 @@ impl Tact
                 current_tact = Tact::new(volume);
             }
 
-            current_tact.add_accord(accord.clone());
+            current_tact.add_accord(*accord);
             if current_tact_volume.is_nan()
             {
                 current_tact_volume = accord.first.unwrap().duration;

@@ -110,12 +110,6 @@ fn main()
                                                             new_accord
                                                         })
                                                    .collect();
-                                                   
-    for accord in accords.iter()
-    {
-        println!("{}", accord);
-    }
-    
     
     let tacts = match tacts::Tact::sequence_from(&accords, config.tacts_volume)
     {
