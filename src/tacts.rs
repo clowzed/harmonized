@@ -1,5 +1,7 @@
 use crate::accords;
+use fraction::ToPrimitive;
 
+<<<<<<< HEAD
 pub enum AddResult
 {
     WAS_ADDED,
@@ -7,6 +9,9 @@ pub enum AddResult
     INCORRECT_VOLUME,
 }
     
+=======
+#[derive(Debug, Clone)]
+>>>>>>> d7cccd8e17a7c48ccf287ed8fbd79e467eab9bae
 pub struct Tact
 {
     accords: std::vec::Vec<accords::Accord>,

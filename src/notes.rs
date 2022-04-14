@@ -26,16 +26,16 @@ const MAX_NUMBER: crate::Number = 7 * (OCTAVE_MAX_NUMBER as crate::Number);
 #[derive(Debug, Clone, Copy)]
 pub struct NoteHeight
 {
-    octave : crate::Octave,
-    number : crate::Number,
+    pub octave : crate::Octave,
+    pub number : crate::Number,
 
 }
 
 #[derive(Debug, Clone, Copy)]
 pub struct Note
 {
-    height   : NoteHeight,
-    duration : crate::Duration,
+    pub height   : NoteHeight,
+    pub duration : crate::Duration,
 }
 
 
@@ -46,11 +46,11 @@ impl NoteHeight
 {
     pub fn new(octave: crate::Octave, number: crate::Number) -> Option<NoteHeight>
     {
-        return match NoteHeight::correct_parameters(octave, number)
+        match NoteHeight::correct_parameters(octave, number)
         {
             true  => Some(NoteHeight{octave, number}.normalized()),
             false => None,
-        };        
+        }
     }
     
     
@@ -81,7 +81,7 @@ impl NoteHeight
         
         let new_octave = match current_number % 7 
                             {   
-                                0 => ((current_number / 7) - (1 as crate::Number)) as crate::Octave,
+                                0 => ((current_number / 7) - (1_i8)) as crate::Octave,
                                 _ => (current_number / 7)  as crate::Octave,
                             };
         
@@ -100,11 +100,11 @@ impl Note
 {
     pub fn new(height: NoteHeight, duration: crate::Duration) -> Option<Note>
     {
-        return match AVAILABLE_NOTES_DURATIONS.contains(&duration)
+        match AVAILABLE_NOTES_DURATIONS.contains(&duration)
         {
             true  => Some(Note{height, duration}),
             false => None,
-        };
+        }
     }
 }
 

@@ -105,18 +105,6 @@ fn get_note(config: &Configuration) -> Option<notes::Note>
 }
 
 
-/*
-fn split_accords_into_tacts(config: &Configuration, accords: &Vec<accords::Accord>) -> Vec<tacts::Tact>
-{
-    let mut current_tact = tacts::Tact::new(tacts_volume);
-    let mut accords_durations_sum = fraction::Fraction::new(0_u64, 0_u64);
-
-
-
-    let mut all_tacts = std::vec::Vec::new();
-}
-*/
-
 fn main()
 {
     let config = Configuration 
@@ -155,8 +143,8 @@ fn main()
                                                             new_accord
                                                         })
                                                    .collect();
-                                                   
-    for accord in accords.iter()
+    
+    let tacts = match tacts::Tact::sequence_from(&accords, config.tacts_volume)
     {
         println!("{}", accord);
     }
