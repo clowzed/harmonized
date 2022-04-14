@@ -20,6 +20,33 @@ struct Configuration
     
 }
 
+
+fn split_accords_into_tacts(config: &Configuration, accords: &Vec<accords::Accord>) -> Option<Vec<tacts::Tact>>
+{
+    let tacts_list = vec![];
+    
+    let tact = tacts::Tact::new(config.tacts_volume);
+    
+    for accord in accord.iter()
+    {
+        match tact.add_accord(accord)
+        {
+            tacts::AddResult::WAS_ADDED => {},
+            tact::AddResult::IS_FULL
+            {
+                tacts.push(tact);
+                tact = tacts::Tact::new(config.tacts_volume);
+            },
+            tact::AddResult::INCORRECT_VOLUME => {
+                return None;
+            }
+        }
+    }
+    
+    Some(tacts);
+}
+
+
 fn get_note(config: &Configuration) -> Option<notes::Note>
 {
     let octaves:Vec<u8> = (1u8..config.accords_amount + 1).collect();
@@ -61,6 +88,12 @@ fn get_note(config: &Configuration) -> Option<notes::Note>
     
     let duration = crate::notes::AVAILABLE_NOTES_DURATIONS[selection];
     
+    match duration <= config.tacts_volume
+    {
+        true => {},
+        false => return None,
+    }
+    
     let note = match notes::Note::new(note_height, duration)
     {
         Some(note) => note,
@@ -89,7 +122,7 @@ fn main()
     let config = Configuration 
     {
         accords_amount : 8,
-        tacts_volume   : fraction::Fraction::new(1u16, 256u16),
+        tacts_volume   : fraction::Fraction::new(1u16, 1u16),
     };
     
     
@@ -129,11 +162,11 @@ fn main()
     }
     
     
-    //let tacts = split_accords_into_tacts(&accords);
-    /*
+    let tacts = split_accords_into_tacts(&accords);
+    
     for tact in tacts.iter()
     {
         println!("{}", tact);
     }
-    */
+
 }

@@ -1,5 +1,12 @@
 use crate::accords;
 
+pub enum AddResult
+{
+    WAS_ADDED,
+    IS_FULL,
+    INCORRECT_VOLUME,
+}
+    
 pub struct Tact
 {
     accords: std::vec::Vec<accords::Accord>,
@@ -20,8 +27,20 @@ impl Tact
 
     pub fn add_accord(&mut self, accord: accords::Accord)
     {
+        if self.is_full()
+        {
+            return AddResult::IS_FULL;
+        }
+        
+        let inner_volume = 
         self.accords.push(accord)
     }
+    
+    pub fn is_full(&self)
+    {
+        return volume == self.accords.iter().map(|accord| accord.first_note.unwrap()).sum();
+    }
+    
 }
 
 impl std::fmt::Display for Tact
